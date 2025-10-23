@@ -9,7 +9,7 @@ CREATE TABLE muestras (
   numero_precinto VARCHAR(255) UNIQUE NOT NULL,
   empresa VARCHAR(255),
   especie VARCHAR(255),
-  cantidad INT UNSIGNED,
+  cantidad_semillar INT UNSIGNED,
   fecha_recepcion DATETIME DEFAULT CURRENT_TIMESTAMP,
   fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

@@ -4,6 +4,8 @@
 /logs/*
 /tmp/*
 /vendor/*
+/bin/*
+/plugins/*
 
 # OS generated files #
 ######################
@@ -23,6 +25,8 @@ Thumbs.db
 #######################
 # PHPUnit
 .phpunit.cache
+/.phpunit.result.cache
+/phpunit.xml
 tests.sqlite
 # vim
 *~
@@ -37,10 +41,12 @@ tests.sqlite
 .settings/*
 # JetBrains, aka PHPStorm, IntelliJ IDEA
 .idea/*
+*.iml
 # NetBeans
 nbproject/*
 # Visual Studio Code
 .vscode
+*.code-workspace
 # nova
 .nova
 # Sass preprocessor
@@ -50,3 +56,6 @@ nbproject/*
 # yarn
 yarn-debug.log
 yarn-error.log
+yarn.lock
+
+composer.phar
