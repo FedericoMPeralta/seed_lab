@@ -3,96 +3,64 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-/**
- * Muestras Controller
- *
- * @property \App\Model\Table\MuestrasTable $Muestras
- */
 class MuestrasController extends AppController
 {
-    /**
-     * Index method
-     *
-     * @return \Cake\Http\Response|null|void Renders view
-     */
     public function index()
     {
-        $query = $this->Muestras->find();
+        $query = $this->Muestras->find()->contain(['Resultados']);
         $muestras = $this->paginate($query);
 
         $this->set(compact('muestras'));
     }
 
-    /**
-     * View method
-     *
-     * @param string|null $id Muestra id.
-     * @return \Cake\Http\Response|null|void Renders view
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
     public function view($id = null)
     {
         $muestra = $this->Muestras->get($id, contain: ['Resultados']);
         $this->set(compact('muestra'));
     }
 
-    /**
-     * Add method
-     *
-     * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
-     */
     public function add()
     {
         $muestra = $this->Muestras->newEmptyEntity();
         if ($this->request->is('post')) {
             $muestra = $this->Muestras->patchEntity($muestra, $this->request->getData());
             if ($this->Muestras->save($muestra)) {
-                $this->Flash->success(__('The muestra has been saved.'));
-
+                $this->Flash->success(__('La muestra ha sido registrada con código: {0}', $muestra->codigo));
                 return $this->redirect(['action' => 'index']);
             }
-            $this->Flash->error(__('The muestra could not be saved. Please, try again.'));
+            $this->Flash->error(__('No se pudo guardar la muestra. Por favor, intente nuevamente.'));
         }
         $this->set(compact('muestra'));
     }
 
-    /**
-     * Edit method
-     *
-     * @param string|null $id Muestra id.
-     * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
     public function edit($id = null)
     {
-        $muestra = $this->Muestras->get($id, contain: []);
+        $muestra = $this->Muestras->get($id, contain: ['Resultados']);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $muestra = $this->Muestras->patchEntity($muestra, $this->request->getData());
             if ($this->Muestras->save($muestra)) {
-                $this->Flash->success(__('The muestra has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
+                $this->Flash->success(__('La muestra ha sido actualizada.'));
+                return $this->redirect(['action' => 'view', $id]);
             }
-            $this->Flash->error(__('The muestra could not be saved. Please, try again.'));
+            $this->Flash->error(__('No se pudo actualizar la muestra. Por favor, intente nuevamente.'));
         }
         $this->set(compact('muestra'));
     }
 
-    /**
-     * Delete method
-     *
-     * @param string|null $id Muestra id.
-     * @return \Cake\Http\Response|null Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
-        $muestra = $this->Muestras->get($id);
+        $muestra = $this->Muestras->get($id, contain: ['Resultados']);
+        $cantResultados = count($muestra->resultados);
+        
         if ($this->Muestras->delete($muestra)) {
-            $this->Flash->success(__('The muestra has been deleted.'));
+            if ($cantResultados > 0) {
+                $this->Flash->success(__('La muestra y sus {0} resultado(s) han sido eliminados.', $cantResultados));
+            } else {
+                $this->Flash->success(__('La muestra ha sido eliminada.'));
+            }
         } else {
-            $this->Flash->error(__('The muestra could not be deleted. Please, try again.'));
+            $this->Flash->error(__('No se pudo eliminar la muestra. Por favor, intente nuevamente.'));
         }
 
         return $this->redirect(['action' => 'index']);

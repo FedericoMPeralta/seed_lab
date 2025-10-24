@@ -1,38 +1,70 @@
-<?php
-/**
- * @var \App\View\AppView $this
- * @var \App\Model\Entity\Resultado $resultado
- * @var string[]|\Cake\Collection\CollectionInterface $muestras
- */
-?>
-<div class="row">
-    <aside class="column">
-        <div class="side-nav">
-            <h4 class="heading"><?= __('Actions') ?></h4>
-            <?= $this->Form->postLink(
-                __('Delete'),
-                ['action' => 'delete', $resultado->id],
-                ['confirm' => __('Are you sure you want to delete # {0}?', $resultado->id), 'class' => 'side-nav-item']
-            ) ?>
-            <?= $this->Html->link(__('List Resultados'), ['action' => 'index'], ['class' => 'side-nav-item']) ?>
+<div class="resultados form content">
+    <h3>Editar Resultado - Muestra <?= h($resultado->muestra->codigo) ?></h3>
+    
+    <?= $this->Form->create($resultado) ?>
+    <fieldset>
+        <legend>Datos del Análisis</legend>
+        
+        <div class="input text disabled">
+            <label>Muestra</label>
+            <input type="text" value="<?= h($resultado->muestra->codigo) ?>" disabled />
         </div>
-    </aside>
-    <div class="column column-80">
-        <div class="resultados form content">
-            <?= $this->Form->create($resultado) ?>
-            <fieldset>
-                <legend><?= __('Edit Resultado') ?></legend>
-                <?php
-                    echo $this->Form->control('muestra_id', ['options' => $muestras]);
-                    echo $this->Form->control('poder_germinativo');
-                    echo $this->Form->control('pureza');
-                    echo $this->Form->control('materiales_inertes');
-                    echo $this->Form->control('fecha_recepcion', ['empty' => true]);
-                    echo $this->Form->control('fecha_modificacion', ['empty' => true]);
-                ?>
-            </fieldset>
-            <?= $this->Form->button(__('Submit')) ?>
-            <?= $this->Form->end() ?>
-        </div>
+        
+        <?= $this->Form->control('muestra_id', ['type' => 'hidden']) ?>
+
+        <?= $this->Form->control('poder_germinativo', [
+            'label' => 'Poder Germinativo (%)',
+            'type' => 'number',
+            'step' => '0.01',
+            'min' => '0',
+            'max' => '100',
+        ]) ?>
+        
+        <?= $this->Form->control('pureza', [
+            'label' => 'Pureza (%)',
+            'type' => 'number',
+            'step' => '0.01',
+            'min' => '0',
+            'max' => '100',
+        ]) ?>
+        
+        <?= $this->Form->control('materiales_inertes', [
+            'label' => 'Materiales Inertes',
+            'type' => 'textarea',
+            'rows' => 3,
+        ]) ?>
+        
+        <?= $this->Form->control('fecha_recepcion', [
+            'label' => 'Fecha de Recepción',
+            'type' => 'datetime-local',
+            'value' => $resultado->fecha_recepcion->format('Y-m-d\TH:i')
+        ]) ?>
+    </fieldset>
+    
+    <?= $this->Form->button(__('Actualizar'), ['class' => 'button']) ?>
+    <?= $this->Html->link(__('Cancelar'), ['controller' => 'Muestras', 'action' => 'view', $resultado->muestra_id], ['class' => 'button secondary']) ?>
+    <?= $this->Form->end() ?>
+    
+    <hr>
+    
+    <div class="actions">
+        <?= $this->Form->postLink(
+            __('Eliminar'),
+            ['action' => 'delete', $resultado->id],
+            [
+                'confirm' => __('¿Está seguro de eliminar este resultado?'),
+                'class' => 'button danger white-text'
+            ]
+        ) ?>
     </div>
 </div>
+
+<style>
+.input.disabled input {
+    background: #f5f5f5;
+    cursor: not-allowed;
+}
+.button.white-text {
+    color: white !important;
+}
+</style>

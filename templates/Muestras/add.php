@@ -6,9 +6,14 @@
             echo $this->Form->control('numero_precinto', ['label' => 'Número de Precinto']);
             echo $this->Form->control('empresa', ['label' => 'Empresa']);
             echo $this->Form->control('especie', ['label' => 'Especie']);
-            echo $this->Form->control('cantidad_semillas', ['label' => 'Cantidad de Semillas']);
+            echo $this->Form->control('cantidad_semillas', [
+                'label' => 'Cantidad de Semillas',
+                'type' => 'number',
+                'min' => '0'
+            ]);
         ?>
     </fieldset>
     <?= $this->Form->button(__('Guardar'), ['class' => 'button']) ?>
+    <?= $this->Html->link(__('Volver'), ['action' => 'index'], ['class' => 'button secondary']) ?>
     <?= $this->Form->end() ?>
 </div>

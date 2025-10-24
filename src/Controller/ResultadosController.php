@@ -3,101 +3,61 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-/**
- * Resultados Controller
- *
- * @property \App\Model\Table\ResultadosTable $Resultados
- */
 class ResultadosController extends AppController
 {
-    /**
-     * Index method
-     *
-     * @return \Cake\Http\Response|null|void Renders view
-     */
-    public function index()
-    {
-        $query = $this->Resultados->find()
-            ->contain(['Muestras']);
-        $resultados = $this->paginate($query);
-
-        $this->set(compact('resultados'));
-    }
-
-    /**
-     * View method
-     *
-     * @param string|null $id Resultado id.
-     * @return \Cake\Http\Response|null|void Renders view
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function view($id = null)
-    {
-        $resultado = $this->Resultados->get($id, contain: ['Muestras']);
-        $this->set(compact('resultado'));
-    }
-
-    /**
-     * Add method
-     *
-     * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
-     */
-    public function add()
+    public function add($muestraId = null)
     {
         $resultado = $this->Resultados->newEmptyEntity();
+        
         if ($this->request->is('post')) {
             $resultado = $this->Resultados->patchEntity($resultado, $this->request->getData());
             if ($this->Resultados->save($resultado)) {
-                $this->Flash->success(__('The resultado has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
+                $this->Flash->success(__('El resultado ha sido guardado.'));
+                return $this->redirect(['controller' => 'Muestras', 'action' => 'view', $resultado->muestra_id]);
             }
-            $this->Flash->error(__('The resultado could not be saved. Please, try again.'));
+            $this->Flash->error(__('No se pudo guardar el resultado. Por favor, intente nuevamente.'));
+        } else if ($muestraId) {
+            $resultado->muestra_id = $muestraId;
+            $muestra = $this->Resultados->Muestras->get($muestraId);
+            $this->set('muestraSeleccionada', $muestra);
         }
-        $muestras = $this->Resultados->Muestras->find('list', limit: 200)->all();
-        $this->set(compact('resultado', 'muestras'));
+        
+        $muestras = $this->Resultados->Muestras->find('all')
+            ->select(['id', 'codigo'])
+            ->order(['codigo' => 'DESC'])
+            ->toArray();
+        
+        $this->set(compact('resultado', 'muestras', 'muestraId'));
     }
 
-    /**
-     * Edit method
-     *
-     * @param string|null $id Resultado id.
-     * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
     public function edit($id = null)
     {
-        $resultado = $this->Resultados->get($id, contain: []);
+        $resultado = $this->Resultados->get($id, contain: ['Muestras']);
+        
         if ($this->request->is(['patch', 'post', 'put'])) {
             $resultado = $this->Resultados->patchEntity($resultado, $this->request->getData());
             if ($this->Resultados->save($resultado)) {
-                $this->Flash->success(__('The resultado has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
+                $this->Flash->success(__('El resultado ha sido actualizado.'));
+                return $this->redirect(['controller' => 'Muestras', 'action' => 'view', $resultado->muestra_id]);
             }
-            $this->Flash->error(__('The resultado could not be saved. Please, try again.'));
+            $this->Flash->error(__('No se pudo actualizar el resultado. Por favor, intente nuevamente.'));
         }
-        $muestras = $this->Resultados->Muestras->find('list', limit: 200)->all();
-        $this->set(compact('resultado', 'muestras'));
+        
+        $this->set(compact('resultado'));
     }
 
-    /**
-     * Delete method
-     *
-     * @param string|null $id Resultado id.
-     * @return \Cake\Http\Response|null Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
         $resultado = $this->Resultados->get($id);
+        $muestraId = $resultado->muestra_id;
+        
         if ($this->Resultados->delete($resultado)) {
-            $this->Flash->success(__('The resultado has been deleted.'));
+            $this->Flash->success(__('El resultado ha sido eliminado.'));
         } else {
-            $this->Flash->error(__('The resultado could not be deleted. Please, try again.'));
+            $this->Flash->error(__('No se pudo eliminar el resultado. Por favor, intente nuevamente.'));
         }
 
-        return $this->redirect(['action' => 'index']);
+        return $this->redirect(['controller' => 'Muestras', 'action' => 'view', $muestraId]);
     }
 }

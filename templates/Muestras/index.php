@@ -6,9 +6,7 @@
             <tr>
                 <th>Código</th>
                 <th>Precinto</th>
-                <th>Empresa</th>
-                <th>Especie</th>
-                <th>Semillas</th>
+                <th>Resultados</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -17,14 +15,21 @@
             <tr>
                 <td><?= h($muestra->codigo) ?></td>
                 <td><?= h($muestra->numero_precinto) ?></td>
-                <td><?= h($muestra->empresa ?? 'Sin datos') ?></td>
-                <td><?= h($muestra->especie ?? 'Sin datos') ?></td>
-                <td><?= $muestra->cantidad_semillas ?? 'Sin datos' ?></td>
-                <td>
-                    <?= $this->Html->link('Ver', ['action' => 'view', $muestra->id], ['class' => 'button small']) ?>
+                <td class="text-center"><?= count($muestra->resultados) ?></td>
+                <td class="actions">
+                    <?= $this->Html->link('Ver Detalle', ['action' => 'view', $muestra->id], ['class' => 'button small white-text']) ?>
                 </td>
             </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 </div>
+
+<style>
+.button.small.white-text {
+    color: white !important;
+}
+.text-center {
+    text-align: center;
+}
+</style>
