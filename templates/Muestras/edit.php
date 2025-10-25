@@ -14,31 +14,72 @@
             ]);
             echo $this->Form->control('fecha_recepcion', [
                 'label' => 'Fecha de Recepción',
-                'type' => 'datetime-local',
-                'value' => $muestra->fecha_recepcion->format('Y-m-d\TH:i')
+                'type' => 'text',
+                'class' => 'datepicker',
+                'value' => $muestra->fecha_recepcion->format('d/m/Y'),
+                'placeholder' => 'dd/mm/aaaa'
             ]);
         ?>
     </fieldset>
     <?= $this->Form->button(__('Actualizar'), ['class' => 'button']) ?>
     <?= $this->Html->link(__('Cancelar'), ['action' => 'view', $muestra->id], ['class' => 'button secondary']) ?>
     <?= $this->Form->end() ?>
-    
-    <hr>
-    
-    <div class="actions">
-        <?php
-        $cantResultados = $muestra->has('resultados') ? count($muestra->resultados) : 0;
-        $confirmMsg = $cantResultados > 0 
-            ? "¿Está seguro de eliminar la muestra {$muestra->codigo} y sus {$cantResultados} resultado(s)?" 
-            : "¿Está seguro de eliminar la muestra {$muestra->codigo}?";
-        ?>
-        <?= $this->Form->postLink(
-            __('Eliminar Muestra'),
-            ['action' => 'delete', $muestra->id],
-            [
-                'confirm' => $confirmMsg,
-                'class' => 'button danger'
-            ]
-        ) ?>
-    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.querySelector('.datepicker');
+    
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+            return;
+        }
+        
+        const value = e.target.value.replace(/\D/g, '');
+        
+        if (value.length >= 8 && e.key >= '0' && e.key <= '9') {
+            e.preventDefault();
+        }
+    });
+    
+    input.addEventListener('input', function(e) {
+        const cursorPos = e.target.selectionStart;
+        let value = e.target.value.replace(/\D/g, '');
+        let formattedValue = '';
+        
+        if (value.length > 0) {
+            formattedValue = value.substring(0, 2);
+        }
+        if (value.length >= 3) {
+            formattedValue += '/' + value.substring(2, 4);
+        }
+        if (value.length >= 5) {
+            formattedValue += '/' + value.substring(4, 8);
+        }
+        
+        e.target.value = formattedValue;
+        
+        let newCursorPos = cursorPos;
+        if (cursorPos === 3 || cursorPos === 6) {
+            newCursorPos = cursorPos + 1;
+        }
+        e.target.setSelectionRange(newCursorPos, newCursorPos);
+    });
+    
+    input.addEventListener('blur', function(e) {
+        const value = e.target.value;
+        const parts = value.split('/');
+        
+        if (value && parts.length === 3) {
+            const day = parseInt(parts[0]);
+            const month = parseInt(parts[1]);
+            const year = parseInt(parts[2]);
+            
+            if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900) {
+                alert('Fecha inválida. Use formato dd/mm/aaaa');
+                e.target.value = '';
+            }
+        }
+    });
+});
+</script>

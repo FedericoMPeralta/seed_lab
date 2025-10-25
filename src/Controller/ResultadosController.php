@@ -10,16 +10,48 @@ class ResultadosController extends AppController
         $resultado = $this->Resultados->newEmptyEntity();
         
         if ($this->request->is('post')) {
-            $resultado = $this->Resultados->patchEntity($resultado, $this->request->getData());
+            $data = $this->request->getData();
+            
+            if (empty($data['muestra_id'])) {
+                $this->Flash->error(__('Debe seleccionar una muestra.'));
+                $this->_prepareAddView($resultado, $muestraId);
+                return;
+            }
+            
+            if (isset($data['poder_germinativo']) && ($data['poder_germinativo'] < 0 || $data['poder_germinativo'] > 100)) {
+                $this->Flash->error(__('El poder germinativo debe estar entre 0 y 100.'));
+                $this->_prepareAddView($resultado, $muestraId);
+                return;
+            }
+            
+            if (isset($data['pureza']) && ($data['pureza'] < 0 || $data['pureza'] > 100)) {
+                $this->Flash->error(__('La pureza debe estar entre 0 y 100.'));
+                $this->_prepareAddView($resultado, $muestraId);
+                return;
+            }
+            
+            $resultado = $this->Resultados->patchEntity($resultado, $data);
             if ($this->Resultados->save($resultado)) {
-                $this->Flash->success(__('El resultado ha sido guardado.'));
+                $muestra = $this->Resultados->Muestras->get($resultado->muestra_id);
+                $this->Flash->success(__('Resultado asignado exitosamente a muestra {0}.', $muestra->codigo));
                 return $this->redirect(['controller' => 'Muestras', 'action' => 'view', $resultado->muestra_id]);
             }
             $this->Flash->error(__('No se pudo guardar el resultado. Por favor, intente nuevamente.'));
-        } else if ($muestraId) {
-            $resultado->muestra_id = $muestraId;
-            $muestra = $this->Resultados->Muestras->get($muestraId);
-            $this->set('muestraSeleccionada', $muestra);
+        }
+        
+        $this->_prepareAddView($resultado, $muestraId);
+    }
+
+    private function _prepareAddView($resultado, $muestraId = null)
+    {
+        if ($muestraId) {
+            try {
+                $muestra = $this->Resultados->Muestras->get($muestraId);
+                $resultado->muestra_id = $muestraId;
+                $this->set('muestraSeleccionada', $muestra);
+            } catch (\Exception $e) {
+                $this->Flash->error(__('Muestra no encontrada.'));
+            }
         }
         
         $muestras = $this->Resultados->Muestras->find('all')
@@ -32,12 +64,36 @@ class ResultadosController extends AppController
 
     public function edit($id = null)
     {
-        $resultado = $this->Resultados->get($id, contain: ['Muestras']);
+        if (!is_numeric($id)) {
+            $this->Flash->error(__('ID de resultado inválido.'));
+            return $this->redirect(['controller' => 'Muestras', 'action' => 'index']);
+        }
+
+        try {
+            $resultado = $this->Resultados->get($id, contain: ['Muestras']);
+        } catch (\Exception $e) {
+            $this->Flash->error(__('Resultado no encontrado.'));
+            return $this->redirect(['controller' => 'Muestras', 'action' => 'index']);
+        }
         
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $resultado = $this->Resultados->patchEntity($resultado, $this->request->getData());
+            $data = $this->request->getData();
+            
+            if (isset($data['poder_germinativo']) && ($data['poder_germinativo'] < 0 || $data['poder_germinativo'] > 100)) {
+                $this->Flash->error(__('El poder germinativo debe estar entre 0 y 100.'));
+                $this->set(compact('resultado'));
+                return;
+            }
+            
+            if (isset($data['pureza']) && ($data['pureza'] < 0 || $data['pureza'] > 100)) {
+                $this->Flash->error(__('La pureza debe estar entre 0 y 100.'));
+                $this->set(compact('resultado'));
+                return;
+            }
+            
+            $resultado = $this->Resultados->patchEntity($resultado, $data);
             if ($this->Resultados->save($resultado)) {
-                $this->Flash->success(__('El resultado ha sido actualizado.'));
+                $this->Flash->success(__('Actualización de resultado de muestra {0} exitosa.', $resultado->muestra->codigo));
                 return $this->redirect(['controller' => 'Muestras', 'action' => 'view', $resultado->muestra_id]);
             }
             $this->Flash->error(__('No se pudo actualizar el resultado. Por favor, intente nuevamente.'));
@@ -49,11 +105,24 @@ class ResultadosController extends AppController
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
-        $resultado = $this->Resultados->get($id);
+        
+        if (!is_numeric($id)) {
+            $this->Flash->error(__('ID de resultado inválido.'));
+            return $this->redirect(['controller' => 'Muestras', 'action' => 'index']);
+        }
+
+        try {
+            $resultado = $this->Resultados->get($id, contain: ['Muestras']);
+        } catch (\Exception $e) {
+            $this->Flash->error(__('Resultado no encontrado.'));
+            return $this->redirect(['controller' => 'Muestras', 'action' => 'index']);
+        }
+
         $muestraId = $resultado->muestra_id;
+        $codigoMuestra = $resultado->muestra->codigo;
         
         if ($this->Resultados->delete($resultado)) {
-            $this->Flash->success(__('El resultado ha sido eliminado.'));
+            $this->Flash->success(__('Resultado de muestra {0} eliminado exitosamente.', $codigoMuestra));
         } else {
             $this->Flash->error(__('No se pudo eliminar el resultado. Por favor, intente nuevamente.'));
         }

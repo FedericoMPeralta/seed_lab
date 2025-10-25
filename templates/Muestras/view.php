@@ -30,9 +30,9 @@
                     <?php foreach ($muestra->resultados as $resultado): ?>
                         <tr>
                             <td><?= $resultado->fecha_recepcion->format('d/m/Y H:i') ?></td>
-                            <td><?= $resultado->poder_germinativo ?>%</td>
-                            <td><?= $resultado->pureza ?>%</td>
-                            <td><?= h($resultado->materiales_inertes ?: '-') ?></td>
+                            <td><?= $resultado->poder_germinativo !== null ? $resultado->poder_germinativo . '%' : 'Sin datos' ?></td>
+                            <td><?= $resultado->pureza !== null ? $resultado->pureza . '%' : 'Sin datos' ?></td>
+                            <td><?= h($resultado->materiales_inertes ?: 'Sin datos') ?></td>
                             <td class="actions">
                                 <?= $this->Html->link('Editar', ['controller' => 'Resultados', 'action' => 'edit', $resultado->id], ['class' => 'button small white-text']) ?>
                                 <?= $this->Form->postLink(
