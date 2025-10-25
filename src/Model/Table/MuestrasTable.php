@@ -7,7 +7,6 @@ use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
-use Cake\Event\EventInterface;
 
 class MuestrasTable extends Table
 {
@@ -27,6 +26,8 @@ class MuestrasTable extends Table
                 ]
             ]
         ]);
+        
+        $this->addBehavior('CodigoGenerator');
 
         $this->hasMany('Resultados', [
             'foreignKey' => 'muestra_id',
@@ -73,32 +74,5 @@ class MuestrasTable extends Table
         $rules->add($rules->isUnique(['numero_precinto']), ['errorField' => 'numero_precinto']);
 
         return $rules;
-    }
-
-    public function beforeSave(EventInterface $event, $entity, $options)
-    {
-        if ($entity->isNew() && empty($entity->codigo)) {
-            $entity->codigo = $this->generarCodigoUnico();
-        }
-    }
-
-    private function generarCodigoUnico(): string
-    {
-        $year = date('Y');
-        $prefix = "SEED-{$year}-";
-        
-        $ultimoRegistro = $this->find()
-            ->where(['codigo LIKE' => "{$prefix}%"])
-            ->order(['codigo' => 'DESC'])
-            ->first();
-
-        if ($ultimoRegistro) {
-            $ultimoNumero = (int)substr($ultimoRegistro->codigo, -4);
-            $nuevoNumero = $ultimoNumero + 1;
-        } else {
-            $nuevoNumero = 1;
-        }
-
-        return $prefix . str_pad((string)$nuevoNumero, 4, '0', STR_PAD_LEFT);
     }
 }

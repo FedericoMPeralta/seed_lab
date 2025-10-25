@@ -4,11 +4,11 @@
     <table>
         <tr><th>Código:</th><td><?= h($muestra->codigo) ?></td></tr>
         <tr><th>Precinto:</th><td><?= h($muestra->numero_precinto) ?></td></tr>
-        <tr><th>Empresa:</th><td><?= h($muestra->empresa ?: 'Sin datos') ?></td></tr>
-        <tr><th>Especie:</th><td><?= h($muestra->especie ?: 'Sin datos') ?></td></tr>
-        <tr><th>Cantidad de semillas:</th><td><?= $muestra->cantidad_semillas ?: 'Sin datos' ?></td></tr>
-        <tr><th>Fecha recepción:</th><td><?= $muestra->fecha_recepcion->format('d/m/Y H:i') ?></td></tr>
-        <tr><th>Fecha modificación:</th><td><?= $muestra->fecha_modificacion->format('d/m/Y H:i') ?></td></tr>
+        <tr><th>Empresa:</th><td><?= h($muestra->empresa) ?: '<span class="sin-datos">Sin datos</span>' ?></td></tr>
+        <tr><th>Especie:</th><td><?= h($muestra->especie) ?: '<span class="sin-datos">Sin datos</span>' ?></td></tr>
+        <tr><th>Cantidad de semillas:</th><td><?= $muestra->cantidad_semillas ?: '<span class="sin-datos">Sin datos</span>' ?></td></tr>
+        <tr><th>Fecha recepción:</th><td><?= $muestra->fecha_recepcion->format('d/m/Y') ?></td></tr>
+        <tr><th>Fecha modificación:</th><td><?= $muestra->fecha_modificacion->format('d/m/Y') ?></td></tr>
     </table>
 
     <div class="related">
@@ -29,18 +29,18 @@
                 <tbody>
                     <?php foreach ($muestra->resultados as $resultado): ?>
                         <tr>
-                            <td><?= $resultado->fecha_recepcion->format('d/m/Y H:i') ?></td>
-                            <td><?= $resultado->poder_germinativo !== null ? $resultado->poder_germinativo . '%' : 'Sin datos' ?></td>
-                            <td><?= $resultado->pureza !== null ? $resultado->pureza . '%' : 'Sin datos' ?></td>
-                            <td><?= h($resultado->materiales_inertes ?: 'Sin datos') ?></td>
+                            <td><?= $resultado->fecha_recepcion->format('d/m/Y') ?></td>
+                            <td><?= $resultado->poder_germinativo !== null ? $resultado->poder_germinativo . '%' : '<span class="sin-datos">Sin datos</span>' ?></td>
+                            <td><?= $resultado->pureza !== null ? $resultado->pureza . '%' : '<span class="sin-datos">Sin datos</span>' ?></td>
+                            <td><?= h($resultado->materiales_inertes) ?: '<span class="sin-datos">Sin datos</span>' ?></td>
                             <td class="actions">
-                                <?= $this->Html->link('Editar', ['controller' => 'Resultados', 'action' => 'edit', $resultado->id], ['class' => 'button small white-text']) ?>
+                                <?= $this->Html->link('Editar', ['controller' => 'Resultados', 'action' => 'edit', $resultado->id], ['class' => 'button small']) ?>
                                 <?= $this->Form->postLink(
                                     'Eliminar',
                                     ['controller' => 'Resultados', 'action' => 'delete', $resultado->id],
                                     [
                                         'confirm' => '¿Eliminar este resultado?',
-                                        'class' => 'button small danger white-text'
+                                        'class' => 'button small danger'
                                     ]
                                 ) ?>
                             </td>
@@ -55,7 +55,7 @@
 
     <br>
     <div class="actions">
-        <?= $this->Html->link('Editar Muestra', ['action' => 'edit', $muestra->id], ['class' => 'button white-text']) ?>
+        <?= $this->Html->link('Editar Muestra', ['action' => 'edit', $muestra->id], ['class' => 'button']) ?>
         <?php
         $cantResultados = count($muestra->resultados);
         $confirmMsg = $cantResultados > 0 
@@ -67,16 +67,9 @@
             ['action' => 'delete', $muestra->id],
             [
                 'confirm' => $confirmMsg,
-                'class' => 'button danger white-text'
+                'class' => 'button danger'
             ]
         ) ?>
-        <?= $this->Html->link('Volver al Listado', ['action' => 'index'], ['class' => 'button secondary white-text']) ?>
+        <?= $this->Html->link('Volver al Listado', ['action' => 'index'], ['class' => 'button secondary']) ?>
     </div>
 </div>
-
-<style>
-.button.white-text,
-.button.small.white-text {
-    color: white !important;
-}
-</style>

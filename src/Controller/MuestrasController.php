@@ -33,6 +33,7 @@ class MuestrasController extends AppController
     {
         $muestra = $this->Muestras->newEmptyEntity();
         $referer = $this->request->getQuery('referer', 'index');
+        
         if ($this->request->is('post')) {
             $data = $this->request->getData();
             
@@ -49,7 +50,10 @@ class MuestrasController extends AppController
             }
             
             if (!empty($data['fecha_recepcion'])) {
-                $data['fecha_recepcion'] = $data['fecha_recepcion'];
+                $fechaObj = \DateTime::createFromFormat('d/m/Y', $data['fecha_recepcion']);
+                if ($fechaObj) {
+                    $data['fecha_recepcion'] = $fechaObj->format('Y-m-d H:i:s');
+                }
             }
             
             $muestra = $this->Muestras->patchEntity($muestra, $data);
@@ -73,14 +77,14 @@ class MuestrasController extends AppController
             $this->Flash->error(__('ID de muestra inválido.'));
             return $this->redirect(['action' => 'index']);
         }
-
+    
         try {
             $muestra = $this->Muestras->get($id, contain: ['Resultados']);
         } catch (\Exception $e) {
             $this->Flash->error(__('Muestra no encontrada.'));
             return $this->redirect(['action' => 'index']);
         }
-
+    
         if ($this->request->is(['patch', 'post', 'put'])) {
             $data = $this->request->getData();
             
@@ -88,6 +92,13 @@ class MuestrasController extends AppController
                 $this->Flash->error(__('La cantidad de semillas no puede ser negativa.'));
                 $this->set(compact('muestra'));
                 return;
+            }
+            
+            if (!empty($data['fecha_recepcion'])) {
+                $fechaObj = \DateTime::createFromFormat('d/m/Y', $data['fecha_recepcion']);
+                if ($fechaObj) {
+                    $data['fecha_recepcion'] = $fechaObj->format('Y-m-d H:i:s');
+                }
             }
             
             $muestra = $this->Muestras->patchEntity($muestra, $data);
@@ -176,15 +187,29 @@ class MuestrasController extends AppController
                 }
             }
         }
-
-        $query->contain(['Resultados' => function ($q) {
-            return $q->order(['Resultados.fecha_recepcion' => 'DESC']);
-        }]);
-
+    
+        $sort = $this->request->getQuery('sort', 'codigo');
+        $direction = $this->request->getQuery('direction', 'asc');
+        
+        if ($sort === 'fecha_analisis') {
+            $query->contain(['Resultados' => function ($q) use ($direction) {
+                return $q->order(['Resultados.fecha_recepcion' => $direction]);
+            }]);
+        } else {
+            $query->contain(['Resultados' => function ($q) {
+                return $q->order(['Resultados.fecha_recepcion' => 'DESC']);
+            }]);
+            
+            $validSortFields = ['codigo', 'empresa', 'especie', 'fecha_recepcion'];
+            if (in_array($sort, $validSortFields)) {
+                $query->order(["Muestras.{$sort}" => $direction]);
+            }
+        }
+    
         $modo = $this->request->getQuery('modo', 'resumen');
-
+    
         $muestras = $query->all();
-
+    
         if ($modo === 'resumen') {
             foreach ($muestras as $muestra) {
                 if (!empty($muestra->resultados)) {
@@ -192,7 +217,7 @@ class MuestrasController extends AppController
                 }
             }
         }
-
+    
         $especies = $this->Muestras->find('list', [
             'keyField' => 'especie',
             'valueField' => 'especie',
@@ -202,7 +227,7 @@ class MuestrasController extends AppController
         ->distinct(['especie'])
         ->order(['especie' => 'ASC'])
         ->toArray();
-
-        $this->set(compact('muestras', 'especies', 'modo', 'tipoFecha'));
+    
+        $this->set(compact('muestras', 'especies', 'modo', 'tipoFecha', 'sort', 'direction'));
     }
 }

@@ -36,8 +36,10 @@
         
         <?= $this->Form->control('fecha_recepcion', [
             'label' => 'Fecha de Recepción',
-            'type' => 'datetime-local',
-            'value' => $resultado->fecha_recepcion->format('Y-m-d\TH:i')
+            'type' => 'text',
+            'class' => 'datepicker',
+            'value' => $resultado->fecha_recepcion->format('d/m/Y'),
+            'placeholder' => 'dd/mm/aaaa'
         ]) ?>
     </fieldset>
     
@@ -53,18 +55,8 @@
             ['action' => 'delete', $resultado->id],
             [
                 'confirm' => __('¿Está seguro de eliminar este resultado?'),
-                'class' => 'button danger white-text'
+                'class' => 'button danger'
             ]
         ) ?>
     </div>
 </div>
-
-<style>
-.input.disabled input {
-    background: #f5f5f5;
-    cursor: not-allowed;
-}
-.button.white-text {
-    color: white !important;
-}
-</style>

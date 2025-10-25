@@ -10,7 +10,7 @@ CREATE TABLE muestras (
   empresa VARCHAR(255),
   especie VARCHAR(255),
   cantidad_semillas INT UNSIGNED,
-  fecha_recepcion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  fecha_recepcion DATE DEFAULT CURRENT_TIMESTAMP,
   fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
@@ -20,7 +20,7 @@ CREATE TABLE resultados (
   poder_germinativo DECIMAL(5,2) CHECK (poder_germinativo BETWEEN 0 AND 100),
   pureza DECIMAL(5,2) CHECK (pureza BETWEEN 0 AND 100),
   materiales_inertes TEXT,
-  fecha_recepcion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  fecha_recepcion DATE DEFAULT CURRENT_TIMESTAMP,
   fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (muestra_id) REFERENCES muestras(id)
 );
@@ -35,11 +35,11 @@ VALUES
 
 INSERT INTO resultados (muestra_id, poder_germinativo, pureza, materiales_inertes, fecha_recepcion)
 VALUES
-(1, 85, 92, 'Restos de paja', '2025-10-21 09:00:00'),
+(1, 85, 92, 'Restos de paja', '2025-10-21'),
 
-(2, 87.50, 94.20, NULL, '2025-10-22 10:15:00'),
+(2, 87.50, 94.20, NULL, '2025-10-22'),
 
-(2, 88, 95.1, '', '2025-10-23 11:30:00');
+(2, 88, 95.1, '', '2025-10-23');
 
 
 -- Crear usuario y dar privilegios

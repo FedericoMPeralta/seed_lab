@@ -3,46 +3,58 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-class ResultadosController extends AppController
-{
+class ResultadosController extends AppController{
+
     public function add($muestraId = null)
     {
         $resultado = $this->Resultados->newEmptyEntity();
+        $referer = $this->request->getQuery('referer', 'muestra');
         
         if ($this->request->is('post')) {
             $data = $this->request->getData();
             
             if (empty($data['muestra_id'])) {
                 $this->Flash->error(__('Debe seleccionar una muestra.'));
-                $this->_prepareAddView($resultado, $muestraId);
+                $this->_prepareAddView($resultado, $muestraId, $referer);
                 return;
             }
             
-            if (isset($data['poder_germinativo']) && ($data['poder_germinativo'] < 0 || $data['poder_germinativo'] > 100)) {
+            if (isset($data['poder_germinativo']) && $data['poder_germinativo'] !== '' && ($data['poder_germinativo'] < 0 || $data['poder_germinativo'] > 100)) {
                 $this->Flash->error(__('El poder germinativo debe estar entre 0 y 100.'));
-                $this->_prepareAddView($resultado, $muestraId);
+                $this->_prepareAddView($resultado, $muestraId, $referer);
                 return;
             }
             
-            if (isset($data['pureza']) && ($data['pureza'] < 0 || $data['pureza'] > 100)) {
+            if (isset($data['pureza']) && $data['pureza'] !== '' && ($data['pureza'] < 0 || $data['pureza'] > 100)) {
                 $this->Flash->error(__('La pureza debe estar entre 0 y 100.'));
-                $this->_prepareAddView($resultado, $muestraId);
+                $this->_prepareAddView($resultado, $muestraId, $referer);
                 return;
+            }
+            
+            if (!empty($data['fecha_recepcion'])) {
+                $fechaObj = \DateTime::createFromFormat('d/m/Y', $data['fecha_recepcion']);
+                if ($fechaObj) {
+                    $data['fecha_recepcion'] = $fechaObj->format('Y-m-d H:i:s');
+                }
             }
             
             $resultado = $this->Resultados->patchEntity($resultado, $data);
             if ($this->Resultados->save($resultado)) {
                 $muestra = $this->Resultados->Muestras->get($resultado->muestra_id);
                 $this->Flash->success(__('Resultado asignado exitosamente a muestra {0}.', $muestra->codigo));
+                
+                if ($referer === 'home') {
+                    return $this->redirect(['controller' => 'Pages', 'action' => 'home']);
+                }
                 return $this->redirect(['controller' => 'Muestras', 'action' => 'view', $resultado->muestra_id]);
             }
             $this->Flash->error(__('No se pudo guardar el resultado. Por favor, intente nuevamente.'));
         }
         
-        $this->_prepareAddView($resultado, $muestraId);
+        $this->_prepareAddView($resultado, $muestraId, $referer);
     }
 
-    private function _prepareAddView($resultado, $muestraId = null)
+    private function _prepareAddView($resultado, $muestraId = null, $referer = 'muestra')
     {
         if ($muestraId) {
             try {
@@ -59,7 +71,7 @@ class ResultadosController extends AppController
             ->order(['codigo' => 'DESC'])
             ->toArray();
         
-        $this->set(compact('resultado', 'muestras', 'muestraId'));
+        $this->set(compact('resultado', 'muestras', 'muestraId', 'referer'));
     }
 
     public function edit($id = null)
