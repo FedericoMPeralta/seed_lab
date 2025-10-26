@@ -3,81 +3,93 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Controller;
 
-use App\Controller\ResultadosController;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
-/**
- * App\Controller\ResultadosController Test Case
- *
- * @link \App\Controller\ResultadosController
- */
 class ResultadosControllerTest extends TestCase
 {
     use IntegrationTestTrait;
 
-    /**
-     * Fixtures
-     *
-     * @var array<string>
-     */
-    protected array $fixtures = [
-        'app.Resultados',
-        'app.Muestras',
-    ];
+    protected array $fixtures = ['app.Muestras', 'app.Resultados'];
 
-    /**
-     * Test index method
-     *
-     * @return void
-     * @link \App\Controller\ResultadosController::index()
-     */
-    public function testIndex(): void
+    public function setUp(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        parent::setUp();
+        $this->enableCsrfToken();
+        $this->enableSecurityToken();
     }
 
-    /**
-     * Test view method
-     *
-     * @return void
-     * @link \App\Controller\ResultadosController::view()
-     */
-    public function testView(): void
+    public function testAgregarResultadoConDatosValidos()
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->post('/resultados/add', [
+            'muestra_id' => 2,
+            'poder_germinativo' => 88.5,
+            'pureza' => 93.2,
+            'materiales_inertes' => 'Tierra fina',
+            'fecha_recepcion' => '28/10/2025'
+        ]);
+        
+        $this->assertRedirect();
+        
+        $resultados = $this->getTableLocator()->get('Resultados');
+        $nuevo = $resultados->find()->orderBy(['id' => 'DESC'])->first();
+        
+        $this->assertEquals(2, $nuevo->muestra_id);
+        $this->assertEquals(88.5, $nuevo->poder_germinativo);
     }
 
-    /**
-     * Test add method
-     *
-     * @return void
-     * @link \App\Controller\ResultadosController::add()
-     */
-    public function testAdd(): void
+    public function testEditarResultadoExistente()
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->post('/resultados/edit/1', [
+            'muestra_id' => 1,
+            'poder_germinativo' => 86.0,
+            'pureza' => 91.5,
+            'materiales_inertes' => 'Actualizado',
+            'fecha_recepcion' => '30/10/2025'
+        ]);
+        
+        $this->assertRedirect(['controller' => 'Muestras', 'action' => 'view', 1]);
+        
+        $resultados = $this->getTableLocator()->get('Resultados');
+        $editado = $resultados->get(1);
+        
+        $this->assertEquals(86.0, $editado->poder_germinativo);
     }
 
-    /**
-     * Test edit method
-     *
-     * @return void
-     * @link \App\Controller\ResultadosController::edit()
-     */
-    public function testEdit(): void
+    public function testEliminarResultadoVuelveADetalleMuestra()
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->post('/resultados/delete/1');
+        
+        $this->assertRedirect(['controller' => 'Muestras', 'action' => 'view', 1]);
     }
 
-    /**
-     * Test delete method
-     *
-     * @return void
-     * @link \App\Controller\ResultadosController::delete()
-     */
-    public function testDelete(): void
+    public function testRefererHomeRedirigeCorrectamente()
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->post('/resultados/add?referer=home', [
+            'muestra_id' => 2,
+            'poder_germinativo' => 80,
+            'fecha_recepcion' => '01/11/2025'
+        ]);
+        
+        $this->assertRedirect(['controller' => 'Pages', 'action' => 'home']);
     }
+
+    public function testConversionFechaFormatoDMY()
+    {
+        $this->post('/resultados/add', [
+            'muestra_id' => 3,
+            'poder_germinativo' => 85,
+            'fecha_recepcion' => '2025-11-15'
+        ]);
+    
+        $resultados = $this->getTableLocator()->get('Resultados');
+        $nuevo = $resultados->find()
+            ->where(['muestra_id' == 3])
+            ->orderBy(['id' => 'DESC'])
+            ->first();
+    
+        $this->assertEquals('2025-11-15', $nuevo->fecha_recepcion->format('Y-m-d'));
+    }
+    
+
 }

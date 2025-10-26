@@ -1,0 +1,58 @@
+Application (App\Test\TestCase\Application)
+ [x] Bootstrap
+ [x] Bootstrap in debug
+ [x] Middleware
+
+Codigo Generator Behavior (App\Test\TestCase\Model\Behavior\CodigoGeneratorBehavior)
+ [x] Codigo se genera automaticamente
+ [x] Formato codigo año actual
+ [x] Numero secuencial tiene 4 digitos
+ [x] Secuencia incrementa correctamente
+ [x] Generar multiples codigos seguidos
+
+Muestras Controller (App\Test\TestCase\Controller\MuestrasController)
+ [x] Index muestra todas
+ [x] Ver detalle con id valido
+ [x] Crear muestra nueva genera codigo
+ [x] Editar actualiza fecha
+ [x] Eliminar muestra y resultados en cascada
+ [x] Reporte modo resumen solo ultimo resultado
+ [x] Reporte filtrado por especie
+ [x] Reporte ordenamiento por codigo
+ [x] Reporte filtro fechas muestra
+
+Muestras Table (App\Test\TestCase\Model\Table\MuestrasTable)
+ [x] Numero precinto es obligatorio
+ [x] Precinto duplicado no permitido
+ [x] Cantidad negativa es rechazada
+ [x] Campos opcionales aceptan null
+ [x] Relacion con resultados es cascada
+ [x] Longitud maxima empresa
+ [x] Guardado completo campos correctos
+ [x] Precinto con caracteres especiales
+
+Pages Controller (App\Test\TestCase\Controller\PagesController)
+ [x] Home muestra estadisticas
+ [x] Home calcula estadisticas correctamente
+ [x] Home tiene link a muestras
+ [x] Home tiene link a reportes
+
+Resultados Controller (App\Test\TestCase\Controller\ResultadosController)
+ [x] Agregar resultado con datos validos
+ [x] Editar resultado existente
+ [x] Eliminar resultado vuelve a detalle muestra
+ [x] Referer home redirige correctamente
+ [x] Conversion fecha formato d m y
+
+Resultados Table (App\Test\TestCase\Model\Table\ResultadosTable)
+ [x] Poder germinativo mayor a 100 rechazado
+ [x] Poder germinativo negativo rechazado
+ [x] Pureza fuera rango superior
+ [x] Pureza fuera rango inferior
+ [x] Guardado con valores limite
+ [x] Guardado con decimales
+ [x] Campos opcionales nulos
+ [x] Relacion con muestras es inner
+ [x] Muestra id inexistente rechazado
+ [x] Mismas muestras varios resultados
+

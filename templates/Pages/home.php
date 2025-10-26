@@ -1,5 +1,5 @@
 <div class="home content">
-    <div class="hero-header">
+    <div class="main-title-header">
         <h1>SEED LAB - INASE</h1>
         <p>Sistema de Gestión de Muestras de Semillas</p>
     </div>

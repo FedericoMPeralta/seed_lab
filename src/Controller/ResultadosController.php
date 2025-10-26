@@ -19,18 +19,6 @@ class ResultadosController extends AppController{
                 return;
             }
             
-            if (isset($data['poder_germinativo']) && $data['poder_germinativo'] !== '' && ($data['poder_germinativo'] < 0 || $data['poder_germinativo'] > 100)) {
-                $this->Flash->error(__('El poder germinativo debe estar entre 0 y 100.'));
-                $this->_prepareAddView($resultado, $muestraId, $referer);
-                return;
-            }
-            
-            if (isset($data['pureza']) && $data['pureza'] !== '' && ($data['pureza'] < 0 || $data['pureza'] > 100)) {
-                $this->Flash->error(__('La pureza debe estar entre 0 y 100.'));
-                $this->_prepareAddView($resultado, $muestraId, $referer);
-                return;
-            }
-            
             if (!empty($data['fecha_recepcion'])) {
                 $fechaObj = \DateTime::createFromFormat('d/m/Y', $data['fecha_recepcion']);
                 if ($fechaObj) {

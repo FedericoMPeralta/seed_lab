@@ -52,7 +52,7 @@ class MuestrasController extends AppController
             if (!empty($data['fecha_recepcion'])) {
                 $fechaObj = \DateTime::createFromFormat('d/m/Y', $data['fecha_recepcion']);
                 if ($fechaObj) {
-                    $data['fecha_recepcion'] = $fechaObj->format('Y-m-d H:i:s');
+                    $data['fecha_recepcion'] = $fechaObj->format('Y-m-d');
                 }
             }
             
@@ -97,7 +97,7 @@ class MuestrasController extends AppController
             if (!empty($data['fecha_recepcion'])) {
                 $fechaObj = \DateTime::createFromFormat('d/m/Y', $data['fecha_recepcion']);
                 if ($fechaObj) {
-                    $data['fecha_recepcion'] = $fechaObj->format('Y-m-d H:i:s');
+                    $data['fecha_recepcion'] = $fechaObj->format('Y-m-d');
                 }
             }
             

@@ -13,7 +13,7 @@ class Muestra extends Entity
         'empresa' => true,
         'especie' => true,
         'cantidad_semillas' => true,
-        'fecha_recepcion' => false,
+        'fecha_recepcion' => true,
         'fecha_modificacion' => false,
         'resultados' => true,
     ];

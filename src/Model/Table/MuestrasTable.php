@@ -21,7 +21,6 @@ class MuestrasTable extends Table
         $this->addBehavior('Timestamp', [
             'events' => [
                 'Model.beforeSave' => [
-                    'fecha_recepcion' => 'new',
                     'fecha_modificacion' => 'always'
                 ]
             ]

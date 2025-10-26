@@ -3,81 +3,133 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Controller;
 
-use App\Controller\MuestrasController;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
-/**
- * App\Controller\MuestrasController Test Case
- *
- * @link \App\Controller\MuestrasController
- */
 class MuestrasControllerTest extends TestCase
 {
     use IntegrationTestTrait;
 
-    /**
-     * Fixtures
-     *
-     * @var array<string>
-     */
-    protected array $fixtures = [
-        'app.Muestras',
-        'app.Resultados',
-    ];
+    protected array $fixtures = ['app.Muestras', 'app.Resultados'];
 
-    /**
-     * Test index method
-     *
-     * @return void
-     * @link \App\Controller\MuestrasController::index()
-     */
-    public function testIndex(): void
+    public function setUp(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        parent::setUp();
+        $this->enableCsrfToken();
+        $this->enableSecurityToken();
     }
 
-    /**
-     * Test view method
-     *
-     * @return void
-     * @link \App\Controller\MuestrasController::view()
-     */
-    public function testView(): void
+    public function testIndexMuestraListadoDeMuestras()
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/muestras');
+        
+        $this->assertResponseOk();
+        $this->assertResponseContains('SEED-2025-0001');
+        $this->assertResponseContains('Listado de Muestras');
     }
 
-    /**
-     * Test add method
-     *
-     * @return void
-     * @link \App\Controller\MuestrasController::add()
-     */
-    public function testAdd(): void
+    public function testVerDetalleConIdValido()
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/muestras/view/1');
+        
+        $this->assertResponseOk();
+        $this->assertResponseContains('SEED-2025-0001');
+        $this->assertResponseContains('A123');
     }
 
-    /**
-     * Test edit method
-     *
-     * @return void
-     * @link \App\Controller\MuestrasController::edit()
-     */
-    public function testEdit(): void
+    public function testCrearMuestraNuevaGeneraCodigoDeMuestra()
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->post('/muestras/add', [
+            'numero_precinto' => 'NUEVO-999',
+            'empresa' => 'Test Corp',
+            'especie' => 'Avena',
+            'cantidad_semillas' => 500,
+            'fecha_recepcion' => '01/11/2025'
+        ]);
+        
+        $this->assertRedirect(['action' => 'index']);
+        
+        $muestras = $this->getTableLocator()->get('Muestras');
+        $nueva = $muestras->find()->where(['numero_precinto' => 'NUEVO-999'])->first();
+        
+        $this->assertNotNull($nueva);
+        $this->assertMatchesRegularExpression('/^SEED-\d{4}-\d{4}$/', $nueva->codigo);
     }
 
-    /**
-     * Test delete method
-     *
-     * @return void
-     * @link \App\Controller\MuestrasController::delete()
-     */
-    public function testDelete(): void
+    public function testEditarActualizaFecha()
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->post('/muestras/edit/1', [
+            'numero_precinto' => 'A123',
+            'empresa' => 'Monsanto Actualizada',
+            'especie' => 'Trigo',
+            'fecha_recepcion' => '15/11/2025'
+        ]);
+        
+        $this->assertRedirect(['action' => 'view', 1]);
+        
+        $muestras = $this->getTableLocator()->get('Muestras');
+        $actualizada = $muestras->get(1);
+        
+        $this->assertEquals('Monsanto Actualizada', $actualizada->empresa);
+        $this->assertEquals('2025-11-15', $actualizada->fecha_recepcion->format('Y-m-d'));
+    }
+
+    public function testEliminarMuestraEliminaResultadosEnCascada()
+    {
+        $resultados = $this->getTableLocator()->get('Resultados');
+        $antesCount = $resultados->find()->where(['muestra_id' => 1])->count();
+        $this->assertGreaterThan(0, $antesCount);
+        
+        $this->post('/muestras/delete/1');
+        
+        $this->assertRedirect(['action' => 'index']);
+        
+        $despuesCount = $resultados->find()->where(['muestra_id' => 1])->count();
+        $this->assertEquals(0, $despuesCount);
+    }
+
+    public function testReporteModoResumenSoloMuestraUltimosResultados()
+    {
+        $this->get('/muestras/reporte?modo=resumen');
+        
+        $this->assertResponseOk();
+        $this->assertResponseContains('Modo Resumen');
+        
+        $viewVars = $this->viewVariable('muestras');
+        $muestra1 = null;
+        foreach ($viewVars as $m) {
+            if ($m->id == 1) {
+                $muestra1 = $m;
+                break;
+            }
+        }
+        
+        $this->assertNotNull($muestra1);
+        $this->assertCount(1, $muestra1->resultados);
+    }
+
+    public function testReporteFiltradoPorEspecie()
+    {
+        $this->get('/muestras/reporte?especie=Trigo');
+        
+        $this->assertResponseOk();
+        $this->assertResponseContains('Trigo');
+    }
+
+    public function testReporteOrdenamientoPorCodigo()
+    {
+        $this->get('/muestras/reporte?sort=codigo&direction=desc');
+        
+        $this->assertResponseOk();
+    }
+
+    public function testReporteFiltroFechasMuestra()
+    {
+        $this->get('/muestras/reporte?tipo_fecha=muestra&fecha_desde=22/10/2025&fecha_hasta=23/10/2025');
+        
+        $this->assertResponseOk();
+        
+        $muestras = $this->viewVariable('muestras');
+        $this->assertGreaterThan(0, $muestras->count());
     }
 }

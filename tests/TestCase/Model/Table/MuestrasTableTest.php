@@ -3,74 +3,115 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Model\Table;
 
-use App\Model\Table\MuestrasTable;
 use Cake\TestSuite\TestCase;
+use Cake\ORM\TableRegistry;
 
-/**
- * App\Model\Table\MuestrasTable Test Case
- */
 class MuestrasTableTest extends TestCase
 {
-    /**
-     * Test subject
-     *
-     * @var \App\Model\Table\MuestrasTable
-     */
+    protected array $fixtures = ['app.Muestras', 'app.Resultados'];
     protected $Muestras;
 
-    /**
-     * Fixtures
-     *
-     * @var array<string>
-     */
-    protected array $fixtures = [
-        'app.Muestras',
-        'app.Resultados',
-    ];
-
-    /**
-     * setUp method
-     *
-     * @return void
-     */
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
-        $config = $this->getTableLocator()->exists('Muestras') ? [] : ['className' => MuestrasTable::class];
-        $this->Muestras = $this->getTableLocator()->get('Muestras', $config);
+        $this->Muestras = TableRegistry::getTableLocator()->get('Muestras');
     }
 
-    /**
-     * tearDown method
-     *
-     * @return void
-     */
-    protected function tearDown(): void
+    public function tearDown(): void
     {
         unset($this->Muestras);
-
         parent::tearDown();
     }
 
-    /**
-     * Test validationDefault method
-     *
-     * @return void
-     * @link \App\Model\Table\MuestrasTable::validationDefault()
-     */
-    public function testValidationDefault(): void
+    public function testNumeroPrecintoEsObligatorio()
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $muestra = $this->Muestras->newEntity([
+            'empresa' => 'Sin Precinto SA',
+        ]);
+        
+        $this->assertFalse($this->Muestras->save($muestra));
+        $this->assertArrayHasKey('numero_precinto', $muestra->getErrors());
     }
 
-    /**
-     * Test buildRules method
-     *
-     * @return void
-     * @link \App\Model\Table\MuestrasTable::buildRules()
-     */
-    public function testBuildRules(): void
+    public function testPrecintoDuplicadoNoPermitido()
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $m1 = $this->Muestras->newEntity(['numero_precinto' => 'DUPL-123']);
+        $this->Muestras->save($m1);
+        
+        $m2 = $this->Muestras->newEntity(['numero_precinto' => 'DUPL-123']);
+        $resultado = $this->Muestras->save($m2);
+        
+        $this->assertFalse($resultado);
+        $this->assertArrayHasKey('numero_precinto', $m2->getErrors());
+    }
+
+    public function testCantidadNegativaEsRechazada()
+    {
+        $muestra = $this->Muestras->newEntity([
+            'numero_precinto' => 'NEG-999',
+            'cantidad_semillas' => -100
+        ]);
+        
+        $this->assertFalse($this->Muestras->save($muestra));
+    }
+
+    public function testCamposOpcionalesAceptanNull()
+    {
+        $muestra = $this->Muestras->newEntity([
+            'numero_precinto' => 'MINIMO-001'
+        ]);
+        
+        $guardado = $this->Muestras->save($muestra);
+        
+        $this->assertNotFalse($guardado);
+        $this->assertNull($guardado->empresa);
+        $this->assertNull($guardado->especie);
+    }
+
+    public function testRelacionConResultadosEsCascada()
+    {
+        $assoc = $this->Muestras->getAssociation('Resultados');
+        
+        $this->assertNotNull($assoc);
+        $this->assertTrue($assoc->getDependent());
+    }
+
+    public function testLongitudMaximaEmpresa()
+    {
+        $nombreLargo = str_repeat('X', 300);
+        
+        $muestra = $this->Muestras->newEntity([
+            'numero_precinto' => 'LARGO-001',
+            'empresa' => $nombreLargo
+        ]);
+        
+        $this->assertFalse($this->Muestras->save($muestra));
+        $this->assertArrayHasKey('empresa', $muestra->getErrors());
+    }
+
+    public function testGuardadoCompletoCamposCorrectos()
+    {
+        $muestra = $this->Muestras->newEntity([
+            'numero_precinto' => 'COMPLETO-001',
+            'empresa' => 'Test Company',
+            'especie' => 'Cebada',
+            'cantidad_semillas' => 2500
+        ]);
+        
+        $guardado = $this->Muestras->save($muestra);
+        
+        $this->assertNotFalse($guardado);
+        $this->assertEquals('Test Company', $guardado->empresa);
+        $this->assertEquals(2500, $guardado->cantidad_semillas);
+    }
+
+    public function testPrecintoConCaracteresEspeciales()
+    {
+        $muestra = $this->Muestras->newEntity([
+            'numero_precinto' => 'TEST-#@!-123'
+        ]);
+        
+        $guardado = $this->Muestras->save($muestra);
+        $this->assertNotFalse($guardado);
     }
 }

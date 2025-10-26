@@ -18,16 +18,15 @@ return [
             'url' => null,
         ],
 
-    ],
-
-    'EmailTransport' => [
-        'default' => [
-            'host' => 'localhost',
-            'port' => 25,
-            'username' => null,
-            'password' => null,
-            'client' => null,
-            'url' => env('EMAIL_TRANSPORT_DEFAULT_URL', null),
+        'test' => [
+        'className' => 'Cake\Database\Connection',
+        'driver' => 'Cake\Database\Driver\Mysql',
+        'persistent' => false,
+        'host' => 'localhost',
+        'username' => 'seed_dev',
+        'password' => '7333',
+        'database' => 'seed_lab_db_test',
+        'cacheMetadata' => true,
         ],
     ],
 ];
