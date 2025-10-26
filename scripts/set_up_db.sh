@@ -1,4 +1,5 @@
 #!/bin/bash
-echo "Creando base de datos"
+echo "Creando bases de datos..."
 sudo mysql -u root < bdd/initiate_db.sql
-echo "Base de datos creada"
+sudo mysql -u root < bdd/initiate_test_db.sql
+echo "Bases de datos creadas exitosamente"

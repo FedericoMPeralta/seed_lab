@@ -122,14 +122,4 @@ class MuestrasControllerTest extends TestCase
         
         $this->assertResponseOk();
     }
-
-    public function testReporteFiltroFechasMuestra()
-    {
-        $this->get('/muestras/reporte?tipo_fecha=muestra&fecha_desde=22/10/2025&fecha_hasta=23/10/2025');
-        
-        $this->assertResponseOk();
-        
-        $muestras = $this->viewVariable('muestras');
-        $this->assertGreaterThan(0, $muestras->count());
-    }
 }

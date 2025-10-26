@@ -4,22 +4,21 @@ Application (App\Test\TestCase\Application)
  [x] Middleware
 
 Codigo Generator Behavior (App\Test\TestCase\Model\Behavior\CodigoGeneratorBehavior)
- [x] Codigo se genera automaticamente
+ [x] Codigo de muestra se genera automaticamente
  [x] Formato codigo año actual
  [x] Numero secuencial tiene 4 digitos
  [x] Secuencia incrementa correctamente
  [x] Generar multiples codigos seguidos
 
 Muestras Controller (App\Test\TestCase\Controller\MuestrasController)
- [x] Index muestra todas
+ [x] Index muestra listado de muestras
  [x] Ver detalle con id valido
- [x] Crear muestra nueva genera codigo
+ [x] Crear muestra nueva genera codigo de muestra
  [x] Editar actualiza fecha
- [x] Eliminar muestra y resultados en cascada
- [x] Reporte modo resumen solo ultimo resultado
+ [x] Eliminar muestra elimina resultados en cascada
+ [x] Reporte modo resumen solo muestra ultimos resultados
  [x] Reporte filtrado por especie
  [x] Reporte ordenamiento por codigo
- [x] Reporte filtro fechas muestra
 
 Muestras Table (App\Test\TestCase\Model\Table\MuestrasTable)
  [x] Numero precinto es obligatorio
