@@ -21,7 +21,7 @@ $direction = $this->request->getQuery('direction', 'asc');
                 <?= $this->Form->control('tipo_fecha', [
                     'options' => [
                         'muestra' => 'Fecha Recepción Muestra',
-                        'resultado' => 'Fecha Recepción Resultado'
+                        'resultado' => 'Fecha Análisis'
                     ],
                     'value' => $tipoFecha,
                     'label' => 'Filtrar por'
@@ -109,9 +109,36 @@ $direction = $this->request->getQuery('direction', 'asc');
                         echo $this->Html->link('Fecha Recep. Muestra' . $arrow, ['?' => $query], ['escape' => false, 'class' => 'sort-link']);
                         ?>
                     </th>
-                    <th>Poder Germinativo</th>
-                    <th>Pureza</th>
-                    <th>Materiales Inertes</th>
+                    <th>
+                        <?php
+                        $newDirection = ($sort === 'poder_germinativo' && $direction === 'asc') ? 'desc' : 'asc';
+                        $arrow = ($sort === 'poder_germinativo') ? ($direction === 'asc' ? ' ▲' : ' ▼') : '';
+                        $query = $this->request->getQuery();
+                        $query['sort'] = 'poder_germinativo';
+                        $query['direction'] = $newDirection;
+                        echo $this->Html->link('Poder Germinativo' . $arrow, ['?' => $query], ['escape' => false, 'class' => 'sort-link']);
+                        ?>
+                    </th>
+                    <th>
+                        <?php
+                        $newDirection = ($sort === 'pureza' && $direction === 'asc') ? 'desc' : 'asc';
+                        $arrow = ($sort === 'pureza') ? ($direction === 'asc' ? ' ▲' : ' ▼') : '';
+                        $query = $this->request->getQuery();
+                        $query['sort'] = 'pureza';
+                        $query['direction'] = $newDirection;
+                        echo $this->Html->link('Pureza' . $arrow, ['?' => $query], ['escape' => false, 'class' => 'sort-link']);
+                        ?>
+                    </th>
+                    <th>
+                        <?php
+                        $newDirection = ($sort === 'materiales_inertes' && $direction === 'asc') ? 'desc' : 'asc';
+                        $arrow = ($sort === 'materiales_inertes') ? ($direction === 'asc' ? ' ▲' : ' ▼') : '';
+                        $query = $this->request->getQuery();
+                        $query['sort'] = 'materiales_inertes';
+                        $query['direction'] = $newDirection;
+                        echo $this->Html->link('Materiales Inertes' . $arrow, ['?' => $query], ['escape' => false, 'class' => 'sort-link']);
+                        ?>
+                    </th>
                     <th>
                         <?php
                         $newDirection = ($sort === 'fecha_analisis' && $direction === 'asc') ? 'desc' : 'asc';
@@ -125,43 +152,39 @@ $direction = $this->request->getQuery('direction', 'asc');
                 </tr>
             </thead>
             <tbody>
-                <?php if ($muestras->count() > 0): ?>
-                    <?php foreach ($muestras as $muestra): ?>
-                        <?php if ($modo === 'detallado' && !empty($muestra->resultados)): ?>
-                            <?php foreach ($muestra->resultados as $index => $resultado): ?>
+                <?php if (count($muestras) > 0): ?>
+                    <?php if ($modo === 'detallado'): ?>
+                        <?php foreach ($muestras as $item): ?>
+                            <?php 
+                            $muestra = $item['muestra'];
+                            $resultado = $item['resultado'];
+                            ?>
                             <tr>
-                                <?php if ($index === 0): ?>
-                                    <td rowspan="<?= count($muestra->resultados) ?>" class="muestra-codigo">
-                                        <?= $this->Html->link($muestra->codigo, ['action' => 'view', $muestra->id]) ?>
-                                    </td>
-                                    <td rowspan="<?= count($muestra->resultados) ?>"><?= h($muestra->empresa) ?: '<span class="sin-datos">Sin datos</span>' ?></td>
-                                    <td rowspan="<?= count($muestra->resultados) ?>"><?= h($muestra->especie) ?: '<span class="sin-datos">Sin datos</span>' ?></td>
-                                    <td rowspan="<?= count($muestra->resultados) ?>"><?= $muestra->fecha_recepcion->format('d/m/Y') ?></td>
-                                <?php endif; ?>
+                                <td><?= $this->Html->link($muestra->codigo, ['action' => 'view', $muestra->id]) ?></td>
+                                <td><?= h($muestra->empresa) ?: '<span class="sin-datos">Sin datos</span>' ?></td>
+                                <td><?= h($muestra->especie) ?: '<span class="sin-datos">Sin datos</span>' ?></td>
+                                <td><?= $muestra->fecha_recepcion ? $muestra->fecha_recepcion->format('d/m/Y') : '<span class="sin-datos">Sin datos</span>' ?></td>
                                 
-                                <td class="text-center"><?= $resultado->poder_germinativo !== null ? $this->Number->format($resultado->poder_germinativo) . '%' : '<span class="sin-datos">Sin datos</span>' ?></td>
-                                <td class="text-center"><?= $resultado->pureza !== null ? $this->Number->format($resultado->pureza) . '%' : '<span class="sin-datos">Sin datos</span>' ?></td>
-                                <td><?= h($resultado->materiales_inertes) ?: '<span class="sin-datos">Sin datos</span>' ?></td>
-                                <td><?= $resultado->fecha_recepcion ? $resultado->fecha_recepcion->format('d/m/Y') : '<span class="sin-datos">Sin datos</span>' ?></td>
+                                <?php if ($resultado): ?>
+                                    <td class="text-center"><?= $resultado->poder_germinativo !== null ? $this->Number->format($resultado->poder_germinativo) . '%' : '<span class="sin-datos">Sin datos</span>' ?></td>
+                                    <td class="text-center"><?= $resultado->pureza !== null ? $this->Number->format($resultado->pureza) . '%' : '<span class="sin-datos">Sin datos</span>' ?></td>
+                                    <td><?= h($resultado->materiales_inertes) ?: '<span class="sin-datos">Sin datos</span>' ?></td>
+                                    <td><?= $resultado->fecha_recepcion ? $resultado->fecha_recepcion->format('d/m/Y') : '<span class="sin-datos">Sin datos</span>' ?></td>
+                                <?php else: ?>
+                                    <td class="text-center"><span class="sin-datos">Sin datos</span></td>
+                                    <td class="text-center"><span class="sin-datos">Sin datos</span></td>
+                                    <td><span class="sin-datos">Sin datos</span></td>
+                                    <td><span class="sin-datos">Sin datos</span></td>
+                                <?php endif; ?>
                             </tr>
-                            <?php endforeach; ?>
-                        <?php elseif ($modo === 'detallado' && empty($muestra->resultados)): ?>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <?php foreach ($muestras as $muestra): ?>
                             <tr>
                                 <td><?= $this->Html->link($muestra->codigo, ['action' => 'view', $muestra->id]) ?></td>
                                 <td><?= h($muestra->empresa) ?: '<span class="sin-datos">Sin datos</span>' ?></td>
                                 <td><?= h($muestra->especie) ?: '<span class="sin-datos">Sin datos</span>' ?></td>
-                                <td><?= $muestra->fecha_recepcion->format('d/m/Y') ?></td>
-                                <td class="text-center"><span class="sin-datos">Sin datos</span></td>
-                                <td class="text-center"><span class="sin-datos">Sin datos</span></td>
-                                <td><span class="sin-datos">Sin datos</span></td>
-                                <td><span class="sin-datos">Sin datos</span></td>
-                            </tr>
-                        <?php else: ?>
-                            <tr>
-                                <td><?= $this->Html->link($muestra->codigo, ['action' => 'view', $muestra->id]) ?></td>
-                                <td><?= h($muestra->empresa) ?: '<span class="sin-datos">Sin datos</span>' ?></td>
-                                <td><?= h($muestra->especie) ?: '<span class="sin-datos">Sin datos</span>' ?></td>
-                                <td><?= $muestra->fecha_recepcion->format('d/m/Y') ?></td>
+                                <td><?= $muestra->fecha_recepcion ? $muestra->fecha_recepcion->format('d/m/Y') : '<span class="sin-datos">Sin datos</span>' ?></td>
                                 
                                 <?php if (!empty($muestra->resultados)): ?>
                                     <?php $resultado = $muestra->resultados[0]; ?>
@@ -176,8 +199,8 @@ $direction = $this->request->getQuery('direction', 'asc');
                                     <td><span class="sin-datos">Sin datos</span></td>
                                 <?php endif; ?>
                             </tr>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 <?php else: ?>
                     <tr>
                         <td colspan="8" class="text-center">
@@ -189,7 +212,7 @@ $direction = $this->request->getQuery('direction', 'asc');
         </table>
     </div>
     
-    <?php if ($muestras->count() > 0): ?>
+    <?php if (count($muestras) > 0): ?>
     <div class="info-box">
         <p>
             <?php if ($modo === 'resumen'): ?>

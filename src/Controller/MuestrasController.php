@@ -37,12 +37,6 @@ class MuestrasController extends AppController
         if ($this->request->is('post')) {
             $data = $this->request->getData();
             
-            if (empty($data['numero_precinto'])) {
-                $this->Flash->error(__('El número de precinto es obligatorio.'));
-                $this->set(compact('muestra', 'referer'));
-                return;
-            }
-            
             if (isset($data['cantidad_semillas']) && $data['cantidad_semillas'] !== '' && $data['cantidad_semillas'] < 0) {
                 $this->Flash->error(__('La cantidad de semillas no puede ser negativa.'));
                 $this->set(compact('muestra', 'referer'));
@@ -54,6 +48,8 @@ class MuestrasController extends AppController
                 if ($fechaObj) {
                     $data['fecha_recepcion'] = $fechaObj->format('Y-m-d');
                 }
+            } else {
+                $data['fecha_recepcion'] = null;
             }
             
             $muestra = $this->Muestras->patchEntity($muestra, $data);
@@ -145,19 +141,19 @@ class MuestrasController extends AppController
 
     public function reporte()
     {
-        $query = $this->Muestras->find()->contain(['Resultados']);
-
+        $query = $this->Muestras->find();
+    
         if ($this->request->getQuery('especie')) {
             $query->where(['Muestras.especie' => $this->request->getQuery('especie')]);
         }
-
+    
         $fechaDesde = $this->request->getQuery('fecha_desde');
         $fechaHasta = $this->request->getQuery('fecha_hasta');
         $tipoFecha = $this->request->getQuery('tipo_fecha', 'muestra');
         
         if ($fechaDesde || $fechaHasta) {
             if ($tipoFecha === 'resultado') {
-                $query->matching('Resultados', function ($q) use ($fechaDesde, $fechaHasta) {
+                $query->innerJoinWith('Resultados', function ($q) use ($fechaDesde, $fechaHasta) {
                     if ($fechaDesde) {
                         $fechaDesdeObj = \DateTime::createFromFormat('d/m/Y', $fechaDesde);
                         if ($fechaDesdeObj) {
@@ -172,6 +168,7 @@ class MuestrasController extends AppController
                     }
                     return $q;
                 });
+                $query->distinct(['Muestras.id']);
             } else {
                 if ($fechaDesde) {
                     $fechaDesdeObj = \DateTime::createFromFormat('d/m/Y', $fechaDesde);
@@ -190,23 +187,11 @@ class MuestrasController extends AppController
     
         $sort = $this->request->getQuery('sort', 'codigo');
         $direction = $this->request->getQuery('direction', 'asc');
-        
-        if ($sort === 'fecha_analisis') {
-            $query->contain(['Resultados' => function ($q) use ($direction) {
-                return $q->order(['Resultados.fecha_recepcion' => $direction]);
-            }]);
-        } else {
-            $query->contain(['Resultados' => function ($q) {
-                return $q->order(['Resultados.fecha_recepcion' => 'DESC']);
-            }]);
-            
-            $validSortFields = ['codigo', 'empresa', 'especie', 'fecha_recepcion'];
-            if (in_array($sort, $validSortFields)) {
-                $query->order(["Muestras.{$sort}" => $direction]);
-            }
-        }
-    
         $modo = $this->request->getQuery('modo', 'resumen');
+        
+        $query->contain(['Resultados' => function ($q) {
+            return $q->order(['Resultados.fecha_recepcion' => 'DESC']);
+        }]);
     
         $muestras = $query->all();
     
@@ -216,6 +201,235 @@ class MuestrasController extends AppController
                     $muestra->resultados = [$muestra->resultados[0]];
                 }
             }
+            
+            $muestrasArray = $muestras->toArray();
+    
+            usort($muestrasArray, function($a, $b) use ($sort, $direction) {
+                $asc = ($direction === 'asc') ? 1 : -1;
+                
+                if ($sort === 'poder_germinativo') {
+                    $aVal = !empty($a->resultados) && $a->resultados[0]->poder_germinativo !== null ? $a->resultados[0]->poder_germinativo : null;
+                    $bVal = !empty($b->resultados) && $b->resultados[0]->poder_germinativo !== null ? $b->resultados[0]->poder_germinativo : null;
+                    
+                    if ($aVal === null && $bVal === null) return 0;
+                    if ($aVal === null) return 1;
+                    if ($bVal === null) return -1;
+                    
+                    return ($aVal <=> $bVal) * $asc;
+                }
+                
+                if ($sort === 'pureza') {
+                    $aVal = !empty($a->resultados) && $a->resultados[0]->pureza !== null ? $a->resultados[0]->pureza : null;
+                    $bVal = !empty($b->resultados) && $b->resultados[0]->pureza !== null ? $b->resultados[0]->pureza : null;
+                    
+                    if ($aVal === null && $bVal === null) return 0;
+                    if ($aVal === null) return 1;
+                    if ($bVal === null) return -1;
+                    
+                    return ($aVal <=> $bVal) * $asc;
+                }
+                
+                if ($sort === 'materiales_inertes') {
+                    $aVal = !empty($a->resultados) && $a->resultados[0]->materiales_inertes !== null ? $a->resultados[0]->materiales_inertes : null;
+                    $bVal = !empty($b->resultados) && $b->resultados[0]->materiales_inertes !== null ? $b->resultados[0]->materiales_inertes : null;
+                    
+                    if ($aVal === null && $bVal === null) return 0;
+                    if ($aVal === null) return 1;
+                    if ($bVal === null) return -1;
+                    
+                    return ($aVal <=> $bVal) * $asc;
+                }
+                
+                if ($sort === 'fecha_analisis') {
+                    $aVal = !empty($a->resultados) && $a->resultados[0]->fecha_recepcion !== null ? $a->resultados[0]->fecha_recepcion->toDateTimeString() : null;
+                    $bVal = !empty($b->resultados) && $b->resultados[0]->fecha_recepcion !== null ? $b->resultados[0]->fecha_recepcion->toDateTimeString() : null;
+                    
+                    if ($aVal === null && $bVal === null) return 0;
+                    if ($aVal === null) return 1;
+                    if ($bVal === null) return -1;
+                    
+                    return ($aVal <=> $bVal) * $asc;
+                }
+                
+                if ($sort === 'empresa') {
+                    $aVal = $a->empresa;
+                    $bVal = $b->empresa;
+                    
+                    if ($aVal === null && $bVal === null) return 0;
+                    if ($aVal === null) return 1;
+                    if ($bVal === null) return -1;
+                    
+                    return strcasecmp($aVal, $bVal) * $asc;
+                }
+                
+                if ($sort === 'especie') {
+                    $aVal = $a->especie;
+                    $bVal = $b->especie;
+                    
+                    if ($aVal === null && $bVal === null) return 0;
+                    if ($aVal === null) return 1;
+                    if ($bVal === null) return -1;
+                    
+                    return strcasecmp($aVal, $bVal) * $asc;
+                }
+                
+                if ($sort === 'fecha_recepcion') {
+                    $aVal = $a->fecha_recepcion !== null ? $a->fecha_recepcion->toDateTimeString() : null;
+                    $bVal = $b->fecha_recepcion !== null ? $b->fecha_recepcion->toDateTimeString() : null;
+                    
+                    if ($aVal === null && $bVal === null) return 0;
+                    if ($aVal === null) return 1;
+                    if ($bVal === null) return -1;
+                    
+                    return ($aVal <=> $bVal) * $asc;
+                }
+                
+                return strcasecmp($a->codigo, $b->codigo) * $asc;
+            });
+        } else {
+            $resultadosFlat = [];
+            foreach ($muestras as $muestra) {
+                if (!empty($muestra->resultados)) {
+                    foreach ($muestra->resultados as $resultado) {
+                        $resultadosFlat[] = [
+                            'muestra' => $muestra,
+                            'resultado' => $resultado
+                        ];
+                    }
+                } else {
+                    $resultadosFlat[] = [
+                        'muestra' => $muestra,
+                        'resultado' => null
+                    ];
+                }
+            }
+            
+            usort($resultadosFlat, function($a, $b) use ($sort, $direction) {
+                $asc = ($direction === 'asc') ? 1 : -1;
+                
+                if ($sort === 'poder_germinativo') {
+                    $aVal = $a['resultado'] && $a['resultado']->poder_germinativo !== null ? $a['resultado']->poder_germinativo : null;
+                    $bVal = $b['resultado'] && $b['resultado']->poder_germinativo !== null ? $b['resultado']->poder_germinativo : null;
+                    
+                    if ($aVal === null && $bVal === null) {
+                        return strcasecmp($a['muestra']->codigo, $b['muestra']->codigo);
+                    }
+                    if ($aVal === null) return 1;
+                    if ($bVal === null) return -1;
+                    
+                    $cmp = ($aVal <=> $bVal) * $asc;
+                    if ($cmp === 0) {
+                        return strcasecmp($a['muestra']->codigo, $b['muestra']->codigo);
+                    }
+                    return $cmp;
+                }
+                
+                if ($sort === 'pureza') {
+                    $aVal = $a['resultado'] && $a['resultado']->pureza !== null ? $a['resultado']->pureza : null;
+                    $bVal = $b['resultado'] && $b['resultado']->pureza !== null ? $b['resultado']->pureza : null;
+                    
+                    if ($aVal === null && $bVal === null) {
+                        return strcasecmp($a['muestra']->codigo, $b['muestra']->codigo);
+                    }
+                    if ($aVal === null) return 1;
+                    if ($bVal === null) return -1;
+                    
+                    $cmp = ($aVal <=> $bVal) * $asc;
+                    if ($cmp === 0) {
+                        return strcasecmp($a['muestra']->codigo, $b['muestra']->codigo);
+                    }
+                    return $cmp;
+                }
+                
+                if ($sort === 'materiales_inertes') {
+                    $aVal = $a['resultado'] && $a['resultado']->materiales_inertes !== null ? $a['resultado']->materiales_inertes : null;
+                    $bVal = $b['resultado'] && $b['resultado']->materiales_inertes !== null ? $b['resultado']->materiales_inertes : null;
+                    
+                    if ($aVal === null && $bVal === null) {
+                        return strcasecmp($a['muestra']->codigo, $b['muestra']->codigo);
+                    }
+                    if ($aVal === null) return 1;
+                    if ($bVal === null) return -1;
+                    
+                    $cmp = ($aVal <=> $bVal) * $asc;
+                    if ($cmp === 0) {
+                        return strcasecmp($a['muestra']->codigo, $b['muestra']->codigo);
+                    }
+                    return $cmp;
+                }
+                
+                if ($sort === 'fecha_analisis') {
+                    $aVal = $a['resultado'] && $a['resultado']->fecha_recepcion !== null ? $a['resultado']->fecha_recepcion->toDateTimeString() : null;
+                    $bVal = $b['resultado'] && $b['resultado']->fecha_recepcion !== null ? $b['resultado']->fecha_recepcion->toDateTimeString() : null;
+                    
+                    if ($aVal === null && $bVal === null) {
+                        return strcasecmp($a['muestra']->codigo, $b['muestra']->codigo);
+                    }
+                    if ($aVal === null) return 1;
+                    if ($bVal === null) return -1;
+                    
+                    $cmp = ($aVal <=> $bVal) * $asc;
+                    if ($cmp === 0) {
+                        return strcasecmp($a['muestra']->codigo, $b['muestra']->codigo);
+                    }
+                    return $cmp;
+                }
+                
+                if ($sort === 'empresa') {
+                    $aVal = $a['muestra']->empresa;
+                    $bVal = $b['muestra']->empresa;
+                    
+                    if ($aVal === null && $bVal === null) {
+                        return strcasecmp($a['muestra']->codigo, $b['muestra']->codigo);
+                    }
+                    if ($aVal === null) return 1;
+                    if ($bVal === null) return -1;
+                    
+                    $cmp = strcasecmp($aVal, $bVal) * $asc;
+                    if ($cmp === 0) {
+                        return strcasecmp($a['muestra']->codigo, $b['muestra']->codigo);
+                    }
+                    return $cmp;
+                }
+                
+                if ($sort === 'especie') {
+                    $aVal = $a['muestra']->especie;
+                    $bVal = $b['muestra']->especie;
+                    
+                    if ($aVal === null && $bVal === null) {
+                        return strcasecmp($a['muestra']->codigo, $b['muestra']->codigo);
+                    }
+                    if ($aVal === null) return 1;
+                    if ($bVal === null) return -1;
+                    
+                    $cmp = strcasecmp($aVal, $bVal) * $asc;
+                    if ($cmp === 0) {
+                        return strcasecmp($a['muestra']->codigo, $b['muestra']->codigo);
+                    }
+                    return $cmp;
+                }
+                
+                if ($sort === 'fecha_recepcion') {
+                    $aVal = $a['muestra']->fecha_recepcion !== null ? $a['muestra']->fecha_recepcion->toDateTimeString() : null;
+                    $bVal = $b['muestra']->fecha_recepcion !== null ? $b['muestra']->fecha_recepcion->toDateTimeString() : null;
+                    
+                    if ($aVal === null && $bVal === null) {
+                        return strcasecmp($a['muestra']->codigo, $b['muestra']->codigo);
+                    }
+                    if ($aVal === null) return 1;
+                    if ($bVal === null) return -1;
+                    
+                    $cmp = ($aVal <=> $bVal) * $asc;
+                    if ($cmp === 0) {
+                        return strcasecmp($a['muestra']->codigo, $b['muestra']->codigo);
+                    }
+                    return $cmp;
+                }
+                
+                return strcasecmp($a['muestra']->codigo, $b['muestra']->codigo) * $asc;
+            });
+            
+            $muestrasArray = $resultadosFlat;
         }
     
         $especies = $this->Muestras->find('list', [
@@ -228,6 +442,7 @@ class MuestrasController extends AppController
         ->order(['especie' => 'ASC'])
         ->toArray();
     
-        $this->set(compact('muestras', 'especies', 'modo', 'tipoFecha', 'sort', 'direction'));
+        $this->set(compact('muestrasArray', 'especies', 'modo', 'tipoFecha', 'sort', 'direction'));
+        $this->set('muestras', $muestrasArray);
     }
 }

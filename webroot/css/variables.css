@@ -1,16 +1,13 @@
 :root {
-    /* Colores principales */
-    --primary-color: #14b8a6;
-    --primary-hover: #0d9488;
-    --primary-light: #5eead4;
-    --primary-dark: #0f766e;
+    --primary-color: #ac278d;
+    --primary-hover: #8b1f70;
+    --primary-light: #d966b8;
+    --primary-dark: #6d1958;
     
-    /* Colores secundarios */
     --secondary-color: #64748b;
     --secondary-hover: #475569;
     --secondary-light: #94a3b8;
     
-    /* Colores de estado */
     --danger-color: #ef4444;
     --danger-hover: #dc2626;
     --success-color: #10b981;
@@ -19,29 +16,24 @@
     --warning-light: #fef3c7;
     --error-light: #fee2e2;
     
-    /* Colores de texto */
     --text-dark: #1e293b;
     --text-medium: #64748b;
     --text-light: #94a3b8;
     --text-lighter: #cbd5e1;
     
-    /* Colores de fondo */
     --bg-light: #f8fafc;
     --bg-white: #ffffff;
     --bg-hover: #f1f5f9;
     --border-color: #e2e8f0;
     
-    /* Sombras */
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
     
-    /* Radios */
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 14px;
     
-    /* Tipografía */
     --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-size-xs: 12px;
     --font-size-sm: 14px;
@@ -50,11 +42,9 @@
     --font-size-xl: 24px;
     --font-size-2xl: 28px;
     
-    /* Gradientes */
-    --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #14b8a6 100%);
+    --gradient-primary: linear-gradient(135deg, #ac278d 0%, #d966b8 100%);
     --gradient-secondary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     
-    /* Transiciones */
     --transition-fast: 0.15s ease;
     --transition-base: 0.2s ease;
     --transition-slow: 0.3s ease;

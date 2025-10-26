@@ -3,7 +3,10 @@
     <?= $this->Form->create($muestra) ?>
     <fieldset>
         <?php
-            echo $this->Form->control('numero_precinto', ['label' => 'Número de Precinto']);
+            echo $this->Form->control('numero_precinto', [
+                'label' => 'Número de Precinto',
+                'autocomplete' => 'off'
+            ]);
             echo $this->Form->control('empresa', ['label' => 'Empresa']);
             echo $this->Form->control('especie', ['label' => 'Especie']);
             echo $this->Form->control('cantidad_semillas', [
@@ -15,7 +18,6 @@
                 'label' => 'Fecha de Recepción',
                 'type' => 'text',
                 'class' => 'datepicker',
-                'value' => date('d/m/Y'),
                 'placeholder' => 'dd/mm/aaaa'
             ]);
         ?>

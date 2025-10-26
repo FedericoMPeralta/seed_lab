@@ -4,9 +4,9 @@
     <?= $this->Html->charset() ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>
-        SEED LAB - INASE
-        <?= $this->fetch('title') ?>
+        Seed Lab
     </title>
+    <link rel="icon" href="/img/inase_logo.png">
 
     <?= $this->Html->css(['custom', 'home', 'reporte', 'datepicker', 'variables']) ?>
 </head>

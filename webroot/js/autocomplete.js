@@ -6,7 +6,7 @@ function initMuestraAutocomplete(muestrasData) {
     if (!searchInput || !hiddenInput || !suggestionsDiv) return;
     
     searchInput.addEventListener('input', function() {
-        const searchValue = this.value.toUpperCase();
+        const searchValue = this.value;
         suggestionsDiv.innerHTML = '';
         
         if (searchValue.length === 0) {
@@ -14,7 +14,7 @@ function initMuestraAutocomplete(muestrasData) {
             return;
         }
         
-        const filtered = muestrasData.filter(m => m.codigo.toUpperCase().includes(searchValue));
+        const filtered = muestrasData.filter(m => m.codigo.includes(searchValue));
         
         if (filtered.length > 0) {
             filtered.slice(0, 10).forEach(muestra => {

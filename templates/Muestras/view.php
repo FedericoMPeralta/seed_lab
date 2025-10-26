@@ -3,11 +3,11 @@
 
     <table>
         <tr><th>Código:</th><td><?= h($muestra->codigo) ?></td></tr>
-        <tr><th>Precinto:</th><td><?= h($muestra->numero_precinto) ?></td></tr>
+        <tr><th>Precinto:</th><td><?= h($muestra->numero_precinto) ?: '<span class="sin-datos">Sin datos</span>' ?></td></tr>
         <tr><th>Empresa:</th><td><?= h($muestra->empresa) ?: '<span class="sin-datos">Sin datos</span>' ?></td></tr>
         <tr><th>Especie:</th><td><?= h($muestra->especie) ?: '<span class="sin-datos">Sin datos</span>' ?></td></tr>
         <tr><th>Cantidad de semillas:</th><td><?= $muestra->cantidad_semillas ?: '<span class="sin-datos">Sin datos</span>' ?></td></tr>
-        <tr><th>Fecha recepción:</th><td><?= $muestra->fecha_recepcion->format('d/m/Y') ?></td></tr>
+        <tr><th>Fecha recepción:</th><td><?= $muestra->fecha_recepcion ? $muestra->fecha_recepcion->format('d/m/Y') : '<span class="sin-datos">Sin datos</span>' ?></td></tr>
         <tr><th>Fecha modificación:</th><td><?= $muestra->fecha_modificacion->format('d/m/Y') ?></td></tr>
     </table>
 
@@ -29,7 +29,7 @@
                 <tbody>
                     <?php foreach ($muestra->resultados as $resultado): ?>
                         <tr>
-                            <td><?= $resultado->fecha_recepcion->format('d/m/Y') ?></td>
+                            <td><?= $resultado->fecha_recepcion ? $resultado->fecha_recepcion->format('d/m/Y') : '<span class="sin-datos">Sin datos</span>' ?></td>
                             <td><?= $resultado->poder_germinativo !== null ? $resultado->poder_germinativo . '%' : '<span class="sin-datos">Sin datos</span>' ?></td>
                             <td><?= $resultado->pureza !== null ? $resultado->pureza . '%' : '<span class="sin-datos">Sin datos</span>' ?></td>
                             <td><?= h($resultado->materiales_inertes) ?: '<span class="sin-datos">Sin datos</span>' ?></td>
@@ -52,7 +52,6 @@
             <p>No hay resultados cargados para esta muestra.</p>
         <?php endif; ?>
     </div>
-
     <br>
     <div class="actions">
         <?= $this->Html->link('Editar Muestra', ['action' => 'edit', $muestra->id], ['class' => 'button']) ?>

@@ -5,6 +5,21 @@ namespace App\Controller;
 
 class ResultadosController extends AppController{
 
+    public function getCodigosJson()
+    {
+        $this->autoRender = false;
+        $this->response = $this->response->withType('application/json');
+        
+        $codigos = $this->Resultados->Muestras->find('list', [
+            'keyField' => 'codigo',
+            'valueField' => 'codigo'
+        ])
+        ->order(['codigo' => 'DESC'])
+        ->toArray();
+        
+        echo json_encode(array_values($codigos));
+    }
+
     public function add($muestraId = null)
     {
         $resultado = $this->Resultados->newEmptyEntity();
@@ -24,6 +39,8 @@ class ResultadosController extends AppController{
                 if ($fechaObj) {
                     $data['fecha_recepcion'] = $fechaObj->format('Y-m-d H:i:s');
                 }
+            } else {
+                $data['fecha_recepcion'] = null;
             }
             
             $resultado = $this->Resultados->patchEntity($resultado, $data);
@@ -78,17 +95,14 @@ class ResultadosController extends AppController{
         
         if ($this->request->is(['patch', 'post', 'put'])) {
             $data = $this->request->getData();
-            
-            if (isset($data['poder_germinativo']) && ($data['poder_germinativo'] < 0 || $data['poder_germinativo'] > 100)) {
-                $this->Flash->error(__('El poder germinativo debe estar entre 0 y 100.'));
-                $this->set(compact('resultado'));
-                return;
-            }
-            
-            if (isset($data['pureza']) && ($data['pureza'] < 0 || $data['pureza'] > 100)) {
-                $this->Flash->error(__('La pureza debe estar entre 0 y 100.'));
-                $this->set(compact('resultado'));
-                return;
+
+            if (!empty($data['fecha_recepcion'])) {
+                $fechaObj = \DateTime::createFromFormat('d/m/Y', $data['fecha_recepcion']);
+                if ($fechaObj) {
+                    $data['fecha_recepcion'] = $fechaObj->format('Y-m-d H:i:s');
+                }
+            } else {
+                $data['fecha_recepcion'] = null;
             }
             
             $resultado = $this->Resultados->patchEntity($resultado, $data);

@@ -38,7 +38,7 @@
             'label' => 'Fecha de Recepción',
             'type' => 'text',
             'class' => 'datepicker',
-            'value' => $resultado->fecha_recepcion->format('d/m/Y'),
+            'value' => $resultado->fecha_recepcion ? $resultado->fecha_recepcion->format('d/m/Y') : '',
             'placeholder' => 'dd/mm/aaaa'
         ]) ?>
     </fieldset>
