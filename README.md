@@ -10,20 +10,39 @@ Seed Lab es una aplicación desarrollada en **CakePHP** para la gestión y anál
 
 **Nota:** Este proceso de instalación está optimizado para sistemas basados en **Debian/Ubuntu** (Ubuntu, Linux Mint, Pop!_OS, etc.). Para otras distribuciones instala manualmente PHP 8.3, MySQL, y Composer.
 
-### Paso 1: Clonar el repositorio
+### Paso 1: Obtener el código
+
+
+Podés obtener el proyecto de dos formas:
+
+
+#### Opción 1: Clonar el repositorio
 
 Clona el proyecto usando **HTTPS** o **SSH**:
+
 ```bash
-# Opción 1: HTTPS
+# HTTPS
 git clone https://github.com/FedericoMPeralta/seed_lab.git
 
-# Opción 2: SSH (si tenés configurada tu clave)
+# SSH (si tenés configurada tu clave)
 git clone git@github.com:FedericoMPeralta/seed_lab.git
 ```
 
-Ingresa al directorio del proyecto:
+Luego, ingresa al directorio del proyecto:
+
 ```bash
 cd seed_lab
+```
+
+#### Opción 2: Descargar release
+
+1. En Releases entrá en la release Seed_lab_beta o entrá al link: (https://github.com/FedericoMPeralta/seed_lab/releases/tag/0.1.0)
+2. Descargá el archivo zip o tar.gz.
+3. Descomprimilo en tu carpeta de trabajo.
+4. Ingresá al directorio descomprimido:
+
+```bash
+cd seed_lab-0.1.0
 ```
 
 ### Paso 2: Instalar dependencias
