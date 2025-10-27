@@ -37,7 +37,7 @@ class ResultadosController extends AppController{
             if (!empty($data['fecha_recepcion'])) {
                 $fechaObj = \DateTime::createFromFormat('d/m/Y', $data['fecha_recepcion']);
                 if ($fechaObj) {
-                    $data['fecha_recepcion'] = $fechaObj->format('Y-m-d H:i:s');
+                    $data['fecha_recepcion'] = $fechaObj->format('Y-m-d');
                 }
             } else {
                 $data['fecha_recepcion'] = null;
@@ -85,7 +85,7 @@ class ResultadosController extends AppController{
             $this->Flash->error(__('ID de resultado inválido.'));
             return $this->redirect(['controller' => 'Muestras', 'action' => 'index']);
         }
-
+    
         try {
             $resultado = $this->Resultados->get($id, contain: ['Muestras']);
         } catch (\Exception $e) {
@@ -94,12 +94,11 @@ class ResultadosController extends AppController{
         }
         
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $data = $this->request->getData();
-
+            $data = $this->request->getData();        
             if (!empty($data['fecha_recepcion'])) {
                 $fechaObj = \DateTime::createFromFormat('d/m/Y', $data['fecha_recepcion']);
                 if ($fechaObj) {
-                    $data['fecha_recepcion'] = $fechaObj->format('Y-m-d H:i:s');
+                    $data['fecha_recepcion'] = $fechaObj->format('Y-m-d');
                 }
             } else {
                 $data['fecha_recepcion'] = null;
