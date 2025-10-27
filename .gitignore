@@ -5,6 +5,7 @@
 /tmp/*
 /vendor/*
 /plugins/*
+/build/*
 
 # OS generated files #
 ######################
